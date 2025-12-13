@@ -18,6 +18,7 @@
 
 import dev.karmakrafts.conventions.configureJava
 import dev.karmakrafts.conventions.setProjectInfo
+import dev.karmakrafts.conventions.setRepository
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
@@ -146,7 +147,7 @@ tasks {
             dependsOn(dokkaJar)
             mustRunAfter(dokkaJar)
             from(zipTree(dokkaJar.get().outputs.files.first()))
-            into(docsDir)
+            into("$docsDir/${project.name}")
         }
     }
 }
