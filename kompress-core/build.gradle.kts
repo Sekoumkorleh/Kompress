@@ -18,7 +18,6 @@
 
 import dev.karmakrafts.conventions.configureJava
 import dev.karmakrafts.conventions.setProjectInfo
-import dev.karmakrafts.conventions.setRepository
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
@@ -27,7 +26,6 @@ import java.time.ZonedDateTime
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.kotlin.jsPlainObjects)
     alias(libs.plugins.android.library)
     alias(libs.plugins.dokka)
     signing
@@ -103,7 +101,6 @@ configureJava(libs.versions.java)
         commonTest {
             dependencies {
                 implementation(libs.kotlin.test)
-                implementation(libs.kotlinx.coroutines.test)
             }
         }
         webMain {
