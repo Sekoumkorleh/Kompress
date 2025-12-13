@@ -6,7 +6,7 @@
 [![](https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fcentral.sonatype.com%2Frepository%2Fmaven-snapshots%2Fdev%2Fkarmakrafts%2Fkompress%2Fkompress-core%2Fmaven-metadata.xml
 )](https://git.karmakrafts.dev/kk/kompress/-/packages)
 
-Lightweight zlib (de)compression API for Kotlin Multiplatform.  
+Lightweight zlib (de)compression API for Kotlin Multiplatform.
 
 ### Features
 
@@ -22,13 +22,6 @@ Lightweight zlib (de)compression API for Kotlin Multiplatform.
 First, add the official Maven Central repository to your settings.gradle.kts:
 
 ```kotlin
-pluginManagement {
-    repositories {
-        maven("https://central.sonatype.com/repository/maven-snapshots")
-        mavenCentral()
-    }
-}
-
 dependencyResolutionManagement {
     repositories {
         maven("https://central.sonatype.com/repository/maven-snapshots")
