@@ -71,10 +71,26 @@ configureJava(libs.versions.java)
                 }
             }
         }
+        nodejs {
+            testTask {
+                useKarma {
+                    timeout = Duration.ofSeconds(30)
+                    useChromeHeadless()
+                }
+            }
+        }
     }
     wasmJs {
         useEsModules()
         browser {
+            testTask {
+                useKarma {
+                    timeout = Duration.ofSeconds(30)
+                    useChromeHeadless()
+                }
+            }
+        }
+        nodejs {
             testTask {
                 useKarma {
                     timeout = Duration.ofSeconds(30)
