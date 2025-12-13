@@ -24,8 +24,8 @@ import kotlin.js.JsAny
 import kotlin.js.JsModule
 
 internal external interface InflateOptions : JsAny {
-    val dictionary: Uint8Array?
-    val out: Uint8Array?
+    var dictionary: Uint8Array?
+    var out: Uint8Array?
 }
 
 internal external class Inflate(options: InflateOptions) : FlateStream {

@@ -14,21 +14,14 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalWasmJsInterop::class) @file:JsModule("fflate")
+@file:OptIn(ExperimentalWasmJsInterop::class)
 
 package dev.karmakrafts.kompress.fflate
 
-import org.khronos.webgl.Uint8Array
 import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.js.JsAny
-import kotlin.js.JsModule
+import kotlin.js.js
 
-internal external interface UnzlibOptions : JsAny {
-    var dictionary: Uint8Array?
-    var out: Uint8Array?
-}
+private fun <T : JsAny> unsafeJso(): T = js("({})")
 
-internal external class Unzlib(options: UnzlibOptions) : FlateStream {
-    override var ondata: FlateStreamHandler?
-    override fun push(data: Uint8Array, isFinal: Boolean)
-}
+internal inline fun <T : JsAny> unsafeJso(initializer: T.() -> Unit = {}): T = unsafeJso<T>().apply(initializer)

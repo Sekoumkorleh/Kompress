@@ -25,8 +25,8 @@ import kotlin.js.JsModule
 import kotlin.js.definedExternally
 
 internal external interface ZlibOptions : JsAny {
-    val level: Int
-    val mem: Int
+    var level: Int
+    var mem: Int
 }
 
 internal external class Zlib( // @formatter:off
