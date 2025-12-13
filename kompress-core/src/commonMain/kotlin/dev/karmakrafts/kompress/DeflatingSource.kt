@@ -67,6 +67,22 @@ private class DeflatingSource( // @formatter:off
     override fun close() = deflater.close()
 }
 
+/**
+ * Returns a [RawSource] that reads uncompressed bytes from this source and
+ * emits their DEFLATE-compressed form.
+ *
+ * This is a streaming wrapper: bytes are compressed on the fly as you read
+ * from the returned source. Close the returned source when finished to free
+ * any underlying resources.
+ *
+ * @param raw If true (default), the compressed stream is in "deflate-raw"
+ *  format without ZLIB header/footer. Set to false to include ZLIB wrapper
+ *  fields, which some consumers may require.
+ * @param level Compression level in range 0..9. See [Deflater.level].
+ * @param bufferSize Size of the internal working buffers used during
+ *  compression.
+ * @return A [RawSource] that produces compressed data.
+ */
 fun RawSource.deflating( // @formatter:off
     raw: Boolean = true,
     level: Int = Deflater.DEFAULT_LEVEL,

@@ -63,6 +63,21 @@ private class InflatingSource( // @formatter:off
     override fun close() = inflater.close()
 }
 
+/**
+ * Returns a [RawSource] that reads DEFLATE-compressed bytes from this source
+ * and emits their uncompressed form.
+ *
+ * This is a streaming wrapper: bytes are decompressed on the fly as you read
+ * from the returned source. Close the returned source when finished to free
+ * any underlying resources.
+ *
+ * @param raw If true (default), expects "deflate-raw" input without ZLIB
+ *  header/footer. Set to false if the compressed input is ZLIB-wrapped and
+ *  includes header and checksum fields.
+ * @param bufferSize Size of the internal working buffers used during
+ *  decompression.
+ * @return A [RawSource] that produces decompressed data.
+ */
 fun RawSource.inflating( // @formatter:off
     raw: Boolean = true,
     bufferSize: Int = Inflater.DEFAULT_BUFFER_SIZE
