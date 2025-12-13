@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-@file:JsModule("fflate")
+package dev.karmakrafts.kompress
 
-package dev.karmakrafts.kompress.fflate
+import kotlin.test.Test
+import kotlin.test.assertTrue
 
-import kotlinx.js.JsPlainObject
-import org.khronos.webgl.Uint8Array
+class DeflaterTest {
+    @Test
+    fun `Raw compression sanity check`() {
+        val data = Deflater.deflate("Hello!".encodeToByteArray())
+        assertTrue(data.isNotEmpty())
+        data.forEach { println("Byte: 0x${it.toHexString()}") }
+    }
 
-@JsPlainObject
-internal external interface DeflateOptions {
-    val level: Int
-    val mem: Int
-}
-
-internal external class Deflate( // @formatter:off
-    options: DeflateOptions,
-    callback: FlateStreamHandler? = definedExternally
-) { // @formatter:on
-    var ondata: FlateStreamHandler?
-    fun push(data: Uint8Array, isFinal: Boolean)
+    @Test
+    fun `Compression sanity check`() {
+        val data = Deflater.deflate("Hello!".encodeToByteArray(), raw = false)
+        assertTrue(data.isNotEmpty())
+        data.forEach { println("Byte: 0x${it.toHexString()}") }
+    }
 }

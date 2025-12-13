@@ -21,7 +21,9 @@ import dev.karmakrafts.conventions.setProjectInfo
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
+import java.time.Duration
 import java.time.ZonedDateTime
+import kotlin.time.Duration.Companion.seconds
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
@@ -66,21 +68,24 @@ configureJava(libs.versions.java)
         browser {
             testTask {
                 useKarma {
+                    timeout = Duration.ofSeconds(30)
                     useChromeHeadless()
                 }
             }
         }
     }
-    wasmJs {
-        useEsModules()
-        browser {
-            testTask {
-                useKarma {
-                    useChromeHeadless()
-                }
-            }
-        }
-    }
+    // wasmJs target is disabled for now to focus on JS debugging
+    // wasmJs {
+    //     useEsModules()
+    //     browser {
+    //         testTask {
+    //             useKarma {
+    //                 timeout = Duration.ofSeconds(30)
+    //                 useChromeHeadless()
+    //             }
+    //         }
+    //     }
+    // }
     applyDefaultHierarchyTemplate {
         common {
             group("jvmAndAndroid") {

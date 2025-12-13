@@ -28,6 +28,10 @@ private class DeflaterImpl(raw: Boolean, initialLevel: Int) : Deflater {
     override val finished: Boolean
         get() = TODO("Not yet implemented")
 
+    override fun finish() {
+        TODO("Not yet implemented")
+    }
+
     override fun deflate(output: ByteArray): Int {
         TODO("Not yet implemented")
     }

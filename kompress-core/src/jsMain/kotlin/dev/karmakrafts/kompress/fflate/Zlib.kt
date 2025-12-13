@@ -24,7 +24,7 @@ import org.khronos.webgl.Uint8Array
 @JsPlainObject
 internal external interface ZlibOptions {
     val level: Int
-    val memLevel: Int
+    val mem: Int
 }
 
 internal external class Zlib( // @formatter:off

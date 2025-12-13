@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:JsModule("fflate")
+
 package dev.karmakrafts.kompress.fflate
 
 import kotlinx.js.JsPlainObject

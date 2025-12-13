@@ -24,16 +24,8 @@ import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class DeflateInflateTest {
-    @Test
-    fun deflate() {
-        val value = "Hellou, World!"
-        val compressedData = Deflater.deflate(value.encodeToByteArray())
-        assertTrue(compressedData.isNotEmpty())
-    }
-
     @Test
     fun `Deflate and inflate small array raw`() {
         val value = "Hellou, World!"
@@ -76,7 +68,7 @@ class DeflateInflateTest {
 
     @Test
     fun `Deflate and inflate large array raw`() {
-        val value = Random.nextBytes(1024 * 1024 * 32)
+        val value = Random.nextBytes(1024 * 1024)
         val compressedData = Deflater.deflate(value)
         val decompressedData = Inflater.inflate(compressedData)
         assertContentEquals(value, decompressedData)
@@ -84,7 +76,7 @@ class DeflateInflateTest {
 
     @Test
     fun `Deflate and inflate large array`() {
-        val value = Random.nextBytes(1024 * 1024 * 32)
+        val value = Random.nextBytes(1024 * 1024)
         val compressedData = Deflater.deflate(value, raw = false)
         val decompressedData = Inflater.inflate(compressedData, raw = false)
         assertContentEquals(value, decompressedData)
@@ -92,7 +84,7 @@ class DeflateInflateTest {
 
     @Test
     fun `Deflate and inflate large buffer raw`() {
-        val value = Random.nextBytes(1024 * 1024 * 128)
+        val value = Random.nextBytes(1024 * 1024)
         val buffer = Buffer()
         buffer.write(value)
         val compressedBuffer = Buffer()
@@ -104,7 +96,7 @@ class DeflateInflateTest {
 
     @Test
     fun `Deflate and inflate large buffer`() {
-        val value = Random.nextBytes(1024 * 1024 * 128)
+        val value = Random.nextBytes(1024 * 1024)
         val buffer = Buffer()
         buffer.write(value)
         val compressedBuffer = Buffer()

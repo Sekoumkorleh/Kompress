@@ -23,17 +23,18 @@ import dev.karmakrafts.kompress.fflate.ZlibOptions
 import org.khronos.webgl.Uint8Array
 import org.khronos.webgl.get
 import org.khronos.webgl.set
+import kotlin.math.min
 
 private class DeflaterImpl( // @formatter:off
     private val raw: Boolean,
     initialLevel: Int
 ) : Deflater { // @formatter:on
     private var impl: FlateStreamWrapper = createImpl(initialLevel)
-    private var onDataFinalSeen: Boolean = false
-    private var finishRequested: Boolean = false
+
+    private var finalRequested: Boolean = false
+    private var finalSeen: Boolean = false
     private var inputPending: Boolean = false
 
-    // Queue of compressed chunks waiting to be consumed by deflate(output)
     private val outQueue: ArrayDeque<ByteArray> = ArrayDeque()
     private var outOffset: Int = 0
 
@@ -43,15 +44,12 @@ private class DeflaterImpl( // @formatter:off
 
     override var level: Int = initialLevel
         set(value) {
-            if (field == value) return
-            // Re-create deflate instance with new level. Changing level during compression is unsupported.
-            impl = createImpl(value)
-            // Reattach handler for the new instance
-            onDataFinalSeen = false
-            outQueue.clear()
-            outOffset = 0
-            impl.ondata = ::onData
             field = value
+            // Replace the underlying implementation and reattach handler
+            impl.ondata = null
+            impl = createImpl(value)
+            impl.ondata = ::onData
+            // Keep current state (queued output, pending input) intact
         }
 
     override var input: ByteArray = ByteArray(0)
@@ -62,40 +60,25 @@ private class DeflaterImpl( // @formatter:off
 
     override val needsInput: Boolean
         get() = !inputPending
-
     override val finished: Boolean
-        get() = onDataFinalSeen && outQueue.isEmpty()
-
-    private fun onData(data: Uint8Array, isFinal: Boolean) {
-        if (data.length > 0) {
-            val chunk = ByteArray(data.length)
-            // NOTE: Direct index access on Uint8Array is not available in this target, so we use asDynamic() here.
-            for (i in 0 until data.length) {
-                chunk[i] = (data[i].toInt() and 0xFF).toByte()
-            }
-            outQueue.addLast(chunk)
-        }
-        if (isFinal) onDataFinalSeen = true
-    }
-
-    private fun createImpl(level: Int): FlateStreamWrapper = FlateStreamWrapper(
-        if (raw) Deflate(DeflateOptions(level, 6), null)
-        else Zlib(ZlibOptions(level, 6))
-    )
+        get() = finalSeen && outQueue.isEmpty()
 
     override fun deflate(output: ByteArray): Int {
-        // Push any pending input/finalization into the underlying stream to generate output
-        if ((inputPending || finishRequested) && !onDataFinalSeen) {
-            val dataToPush: Uint8Array = if (inputPending && input.isNotEmpty()) {
-                val data = Uint8Array(input.size)
-                for (i in input.indices) {
-                    data[i] = (input[i].toInt() and 0xFF).toByte()
-                }
-                data
+        // Push pending input to the underlying deflater
+        if (inputPending && !finalSeen) {
+            val dataToPush: Uint8Array = if (input.isNotEmpty()) {
+                val arr = Uint8Array(input.size)
+                for (i in input.indices) arr[i] = (input[i].toInt() and 0xFF).toByte()
+                arr
             }
             else Uint8Array(0)
-            impl.push(dataToPush, finishRequested)
+            impl.push(dataToPush, finalRequested)
             inputPending = false
+        }
+
+        // If finalization requested but no input pending, still need to flush by pushing empty final chunk
+        if (!inputPending && finalRequested && !finalSeen) {
+            impl.push(Uint8Array(0), true)
         }
 
         if (outQueue.isEmpty()) return 0
@@ -105,14 +88,14 @@ private class DeflaterImpl( // @formatter:off
         while (remaining > 0 && outQueue.isNotEmpty()) {
             val head = outQueue.first()
             val available = head.size - outOffset
-            val toCopy = minOf(available, remaining)
+            val toCopy = min(available, remaining)
             if (toCopy > 0) {
-                head.copyInto( // @formatter:off
+                head.copyInto(
                     destination = output,
                     destinationOffset = written,
                     startIndex = outOffset,
                     endIndex = outOffset + toCopy
-                ) // @formatter:on
+                )
                 written += toCopy
                 remaining -= toCopy
                 outOffset += toCopy
@@ -126,19 +109,32 @@ private class DeflaterImpl( // @formatter:off
     }
 
     override fun finish() {
-        // Signal that the next push should finalize the stream
-        finishRequested = true
-        // If no input is pending, we still need to flush trailer; the actual push happens on next deflate()
+        finalRequested = true
     }
 
     override fun close() {
-        // Best-effort cleanup
         impl.ondata = null
         outQueue.clear()
         outOffset = 0
         inputPending = false
-        finishRequested = false
-        onDataFinalSeen = true
+        finalRequested = true
+        finalSeen = true
+    }
+
+    private fun createImpl(level: Int): FlateStreamWrapper = FlateStreamWrapper(
+        if (raw) Deflate(DeflateOptions(level, 6), null)
+        else Zlib(ZlibOptions(level, 6))
+    )
+
+    private fun onData(data: Uint8Array, isFinal: Boolean) {
+        if (data.length > 0) {
+            val chunk = ByteArray(data.length)
+            for (i in 0 until data.length) {
+                chunk[i] = (data[i].toInt() and 0xFF).toByte()
+            }
+            outQueue.addLast(chunk)
+        }
+        if (isFinal) finalSeen = true
     }
 }
 
