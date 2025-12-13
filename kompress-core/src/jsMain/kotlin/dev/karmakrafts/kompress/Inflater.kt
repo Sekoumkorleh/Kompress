@@ -22,51 +22,45 @@ import dev.karmakrafts.kompress.fflate.Unzlib
 import dev.karmakrafts.kompress.fflate.UnzlibOptions
 import org.khronos.webgl.Uint8Array
 import org.khronos.webgl.get
-import org.khronos.webgl.set
+import org.khronos.webgl.toUint8Array
 import kotlin.math.min
 
 private class InflaterImpl(raw: Boolean) : Inflater {
     private var impl: FlateStreamWrapper = FlateStreamWrapper(
         if (raw) Inflate(InflateOptions(null, null)) else Unzlib(UnzlibOptions(null, null))
-    )
+    ).apply {
+        ondata = ::onData
+    }
 
     private var inputPending: Boolean = false
     private var finalSeen: Boolean = false
     private var finalPushed: Boolean = false
-
     private val outQueue: ArrayDeque<ByteArray> = ArrayDeque()
     private var outOffset: Int = 0
-
-    init {
-        impl.ondata = ::onData
-    }
+    private val emptyUint8Array: Uint8Array = Uint8Array(0)
 
     override var input: ByteArray = ByteArray(0)
         set(value) {
             field = value
             inputPending = true
         }
+
     override val needsInput: Boolean
         get() = !inputPending
+
     override val finished: Boolean
         get() = finalSeen && outQueue.isEmpty()
 
+    @OptIn(ExperimentalUnsignedTypes::class)
     override fun inflate(output: ByteArray): Int {
-        // Push pending input to the underlying inflater. For streaming safety, never mark
-        // a non-empty input push as final; we'll emit a zero-length final push when we
-        // detect no more input is forthcoming (or on close()).
+        if (output.isEmpty()) return 0
         if (inputPending && !finalSeen) {
-            val dataToPush: Uint8Array = if (input.isNotEmpty()) {
-                val arr = Uint8Array(input.size)
-                for (i in input.indices) arr[i] = (input[i].toInt() and 0xFF).toByte()
-                arr
-            } else Uint8Array(0)
+            val dataToPush = if (input.isNotEmpty()) input.asUByteArray().toUint8Array() else emptyUint8Array
             impl.push(dataToPush, false)
             inputPending = false
-        } else if (!finalSeen && !finalPushed && outQueue.isEmpty()) {
-            // No input pending and consumer is asking for more; try to finalize the stream
-            // with an empty final push to flush any remaining data.
-            impl.push(Uint8Array(0), true)
+        }
+        else if (!finalSeen && !finalPushed && outQueue.isEmpty()) {
+            impl.push(emptyUint8Array, true)
             finalPushed = true
         }
 
@@ -98,10 +92,8 @@ private class InflaterImpl(raw: Boolean) : Inflater {
     }
 
     override fun close() {
-        // Ensure the underlying stream is finalized to allow any trailing data to be emitted
-        // and `finished` to become true.
         if (!finalSeen && !finalPushed) {
-            impl.push(Uint8Array(0), true)
+            impl.push(emptyUint8Array, true)
             finalPushed = true
         }
         impl.ondata = null
@@ -109,14 +101,13 @@ private class InflaterImpl(raw: Boolean) : Inflater {
         outOffset = 0
         inputPending = false
         finalSeen = true
+        input = ByteArray(0)
     }
 
     private fun onData(data: Uint8Array, isFinal: Boolean) {
         if (data.length > 0) {
             val chunk = ByteArray(data.length)
-            for (i in 0 until data.length) {
-                chunk[i] = (data[i].toInt() and 0xFF).toByte()
-            }
+            for (i in 0 until data.length) chunk[i] = (data[i].toInt() and 0xFF).toByte()
             outQueue.addLast(chunk)
         }
         if (isFinal) finalSeen = true

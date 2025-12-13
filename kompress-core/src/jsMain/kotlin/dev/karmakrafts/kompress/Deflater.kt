@@ -22,7 +22,7 @@ import dev.karmakrafts.kompress.fflate.Zlib
 import dev.karmakrafts.kompress.fflate.ZlibOptions
 import org.khronos.webgl.Uint8Array
 import org.khronos.webgl.get
-import org.khronos.webgl.set
+import org.khronos.webgl.toUint8Array
 import kotlin.math.min
 
 private class DeflaterImpl( // @formatter:off
@@ -30,26 +30,17 @@ private class DeflaterImpl( // @formatter:off
     initialLevel: Int
 ) : Deflater { // @formatter:on
     private var impl: FlateStreamWrapper = createImpl(initialLevel)
-
     private var finalRequested: Boolean = false
     private var finalSeen: Boolean = false
     private var inputPending: Boolean = false
-
     private val outQueue: ArrayDeque<ByteArray> = ArrayDeque()
     private var outOffset: Int = 0
-
-    init {
-        impl.ondata = ::onData
-    }
+    private val emptyUint8Array: Uint8Array = Uint8Array(0)
 
     override var level: Int = initialLevel
         set(value) {
             field = value
-            // Replace the underlying implementation and reattach handler
-            impl.ondata = null
             impl = createImpl(value)
-            impl.ondata = ::onData
-            // Keep current state (queued output, pending input) intact
         }
 
     override var input: ByteArray = ByteArray(0)
@@ -63,22 +54,17 @@ private class DeflaterImpl( // @formatter:off
     override val finished: Boolean
         get() = finalSeen && outQueue.isEmpty()
 
+    @OptIn(ExperimentalUnsignedTypes::class)
     override fun deflate(output: ByteArray): Int {
-        // Push pending input to the underlying deflater
+        if (output.isEmpty()) return 0
         if (inputPending && !finalSeen) {
-            val dataToPush: Uint8Array = if (input.isNotEmpty()) {
-                val arr = Uint8Array(input.size)
-                for (i in input.indices) arr[i] = (input[i].toInt() and 0xFF).toByte()
-                arr
-            }
-            else Uint8Array(0)
+            val dataToPush = if (input.isNotEmpty()) input.asUByteArray().toUint8Array() else emptyUint8Array
             impl.push(dataToPush, finalRequested)
             inputPending = false
         }
 
-        // If finalization requested but no input pending, still need to flush by pushing empty final chunk
         if (!inputPending && finalRequested && !finalSeen) {
-            impl.push(Uint8Array(0), true)
+            impl.push(emptyUint8Array, true)
         }
 
         if (outQueue.isEmpty()) return 0
@@ -119,19 +105,20 @@ private class DeflaterImpl( // @formatter:off
         inputPending = false
         finalRequested = true
         finalSeen = true
+        input = ByteArray(0)
     }
 
     private fun createImpl(level: Int): FlateStreamWrapper = FlateStreamWrapper(
         if (raw) Deflate(DeflateOptions(level, 6), null)
         else Zlib(ZlibOptions(level, 6))
-    )
+    ).apply {
+        ondata = ::onData
+    }
 
     private fun onData(data: Uint8Array, isFinal: Boolean) {
         if (data.length > 0) {
             val chunk = ByteArray(data.length)
-            for (i in 0 until data.length) {
-                chunk[i] = (data[i].toInt() and 0xFF).toByte()
-            }
+            for (i in 0 until data.length) chunk[i] = (data[i].toInt() and 0xFF).toByte()
             outQueue.addLast(chunk)
         }
         if (isFinal) finalSeen = true
