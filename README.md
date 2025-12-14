@@ -91,6 +91,7 @@ fun main() {
     )
     val outputBuffer = ByteArray(1024)
     while(deflater.needsInput) {
+        if(!hasMoreInput) deflater.finish() // Signal that we are done compressing
         deflater.input = getInputChunk()
         while(!deflater.finished) {
             deflater.deflate(outputBuffer) // Deflate data into the buffer
@@ -110,9 +111,9 @@ fun main() {
     buffer.writeFloat(4.20F)
     
     val compressedBuffer = Buffer()
-    compressedBuffer.transferFrom(buffer.deflating())
+    buffer.deflating().use(compressedBuffer::transferFrom)
     
     val decompressedBuffer = Buffer()
-    decompressedBuffer.transferFrom(compressedBuffer.inflating())
+    compressedBuffer.inflating().use(decompressedBuffer::transferFrom)
 }
 ```
