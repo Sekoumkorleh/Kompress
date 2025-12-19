@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Karma Krafts & associates
+ * Copyright 2025 Karma Krafts
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,12 @@
 @file:OptIn(ExperimentalKotlinGradlePluginApi::class)
 
 import dev.karmakrafts.conventions.configureJava
+import dev.karmakrafts.conventions.defaultDokkaConfig
 import dev.karmakrafts.conventions.setProjectInfo
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
 import java.time.Duration
-import java.time.ZonedDateTime
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
@@ -33,6 +33,7 @@ plugins {
 }
 
 configureJava(libs.versions.java)
+defaultDokkaConfig()
 
 @OptIn(ExperimentalWasmDsl::class) kotlin {
     compilerOptions {
@@ -44,8 +45,10 @@ configureJava(libs.versions.java)
     linuxArm64()
     macosX64()
     macosArm64()
-    androidTarget {
-        publishLibraryVariants("debug", "release")
+    androidLibrary {
+        namespace = "$group.${rootProject.name}"
+        compileSdk = libs.versions.androidCompileSDK.get().toInt()
+        minSdk = libs.versions.androidMinimalSDK.get().toInt()
     }
     androidNativeArm32()
     androidNativeArm64()
@@ -129,40 +132,9 @@ configureJava(libs.versions.java)
     }
 }
 
-android {
-    namespace = "$group.${rootProject.name}"
-    compileSdk = libs.versions.androidCompileSDK.get().toInt()
-    defaultConfig {
-        minSdk = libs.versions.androidMinimalSDK.get().toInt()
-    }
-}
-
-dokka {
-    moduleName = project.name
-    pluginsConfiguration {
-        html {
-            footerMessage = "&copy; ${ZonedDateTime.now().year} Karma Krafts"
-        }
-    }
-}
-
-val dokkaJar by tasks.registering(Jar::class) {
-    group = "dokka"
-    from(tasks.dokkaGeneratePublicationHtml.flatMap { it.outputDirectory })
-    archiveClassifier.set("javadoc")
-}
-
 tasks {
     withType<KotlinJvmTest>().configureEach {
         jvmArgs("-Xms2G", "-Xmx2G")
-    }
-    System.getProperty("publishDocs.root")?.let { docsDir ->
-        register("publishDocs", Copy::class) {
-            dependsOn(dokkaJar)
-            mustRunAfter(dokkaJar)
-            from(zipTree(dokkaJar.get().outputs.files.first()))
-            into("$docsDir/${project.name}")
-        }
     }
 }
 
@@ -172,7 +144,4 @@ publishing {
         description = "Lightweight zlib API for Kotlin Multiplatform",
         url = "https://git.karmakrafts.dev/kk/kompress"
     )
-    publications.withType<MavenPublication>().configureEach {
-        artifact(dokkaJar)
-    }
 }

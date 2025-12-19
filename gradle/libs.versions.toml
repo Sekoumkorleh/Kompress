@@ -6,12 +6,12 @@ androidGradle = "8.12.3" # https://developer.android.com/reference/tools/gradle-
 androidCompileSDK = "36"
 androidMinimalSDK = "28"
 
-kompress = "1.2.1"
-kotlin = "2.2.21" # https://github.com/JetBrains/kotlin/releases
+kompress = "1.3.0"
+kotlin = "2.3.0" # https://github.com/JetBrains/kotlin/releases
 kotlinxIo = "0.8.2" # https://github.com/Kotlin/kotlinx-io/releases
 kotlinxBrowser = "0.5.0" # https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-browser
 dokka = "2.1.0" # https://github.com/Kotlin/dokka/releases
-karmaConventions = "1.8.1" # https://github.com/karmakrafts/karma-conventions/tags
+karmaConventions = "1.9.4" # https://github.com/karmakrafts/karma-conventions/tags
 gradleNexus = "2.0.0" # https://github.com/gradle-nexus/publish-plugin/releases
 fflate = "0.8.2" # https://github.com/101arrowz/fflate/releases
 
@@ -24,7 +24,7 @@ kotlinx-browser = { module = "org.jetbrains.kotlinx:kotlinx-browser", version.re
 
 [plugins]
 
-android-library = { id = "com.android.library", version.ref = "androidGradle" }
+android-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "androidGradle" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 karmaConventions = { id = "dev.karmakrafts.conventions.karma-conventions", version.ref = "karmaConventions" }
