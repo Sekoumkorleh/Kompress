@@ -16,6 +16,7 @@
 
 @file:OptIn(ExperimentalKotlinGradlePluginApi::class)
 
+import com.android.build.api.dsl.KotlinMultiplatformAndroidCompilation
 import dev.karmakrafts.conventions.configureJava
 import dev.karmakrafts.conventions.defaultDokkaConfig
 import dev.karmakrafts.conventions.setProjectInfo
@@ -107,7 +108,7 @@ defaultDokkaConfig()
         common {
             group("jvmAndAndroid") {
                 withJvm()
-                withAndroidTarget()
+                withCompilations { it is KotlinMultiplatformAndroidCompilation }
             }
         }
     }
